@@ -1,0 +1,31 @@
+{
+  "name": "boosting-your-productivity",
+  "version": "0.0.1",
+  "authors": [
+    "Gabriel Zigolis <gabriel.zigolis@gmail.com>"
+  ],
+  "description": "Example code using Backbone and RactiveJS",
+  "main": "main.js",
+  "moduleType": [
+    "amd",
+    "node"
+  ],
+  "keywords": [
+    "backbonejs",
+    "ractivejs",
+    "javascript",
+    "node",
+    "bower",
+    "gruntjs"
+  ],
+  "license": "MIT",
+  "homepage": "http://github.com/zigolis/boosting-your-productivity",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "assets/vendor",
+    "test",
+    "tests"
+  ]
+}
