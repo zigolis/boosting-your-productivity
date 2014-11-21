@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>RactiveJS</title>
+        <link rel="stylesheet" href="assets/vendor/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/component.css">
+        <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=PT+Sans:400,700|Open+Sans:400,300,700'>
+    </head>
+    <body>
+      <header class="header">
+        <div class="container">
+          <div class="col-md-12">
+            <h1><a href="#">blogMV*</a></h1>
+          </div>
+        </div>
+      </header>
+
+      <div class="jumbotron">
+        <div class="container">
+          <h1>Ractive</h1>
+          <p>Two way binding</p>
+        </div>
+      </div>
+
+      <section class="container main">
+        <div class="row">
+          <div class="col-md-3">
+            <div id="output"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer id="footer">
+        <p>
+          Made with ❤ by a bunch of geeks from the island of magic |
+          <a href="https://twitter.com/zigolis">@zigolis</a>
+        </p>
+      </footer>
+
+      <script id='template' type='text/ractive'>
+        <label>
+          Enter your name:
+          <input value='{{name}}'>
+        </label>
+
+        <p>Hello {{name}}, I am Ractive</p>
+      </script>
+
+      <script src='assets/vendor/ractive/ractive.min.js'></script>
+      <script>
+        var ractive = new Ractive({
+          el: '#output',
+          template: '#template'
+        });
+      </script>
+  </body>
+</html>
