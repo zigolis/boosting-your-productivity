@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>RactiveJS</title>
+        <link rel="stylesheet" href="assets/vendor/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/component.css">
+        <link rel="stylesheet" href="assets/css/todolist.css">
+        <!-- <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=PT+Sans:400,700|Open+Sans:400,300,700'> -->
+    </head>
+    <body>
+      <header class="header">
+        <div class="container">
+          <div class="col-md-12">
+            <h1><a href="#">Ractive</a></h1>
+          </div>
+        </div>
+      </header>
+
+      <div class="jumbotron">
+        <div class="container">
+          <h1>To do list</h1>
+        </div>
+      </div>
+
+      <section class="container main">
+        <div class="row">
+          <div class="col-md-12">
+            <header>
+              <h1>Todos</h1>
+            </header>
+
+            <main>
+              <div class="example-container">
+                <div id="example">
+                  <noscript>
+                    <p class=message>Please <a href=www.enable-javascript.com>enable JavaScript</a> to view this example.</p>
+                  </noscript>
+                </div>
+              </div>
+
+              <div id="info"></div>
+            </main>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <p>
+          Made with ❤ by a bunch of geeks from the island of magic |
+          <a href="https://twitter.com/zigolis">@zigolis</a>
+        </p>
+      </footer>
+
+      <script id="template" type="text/ractive"><div class='todo-app'>
+        <header id='header'>
+          <!-- we bind to the custom 'enter' event as well as 'change', for the benefit of IE -->
+          <input id='new-todo' on-enter-change='new_todo' placeholder='What needs to be done?' autofocus>
+        </header>
+
+        {{#items.length}} <!-- only show when there are one or more items -->
+          <section id='main'>
+
+            <!-- 'toggle all' button -->
+            <label for='toggle-all'>Mark all as complete</label>
+            <input
+              id='toggle-all'
+              type='checkbox'
+              on-click-change='toggle_all'
+              checked='{{ items.length === completedTodos() }}'
+              intro='fade'
+              outro='fade'
+            >
+
+            <!-- the actual list -->
+            <ul id='todo-list'>
+              {{#items:i}}
+                {{>item}}
+              {{/items}}
+            </ul>
+          </section>
+
+          <div id='footer' intro='fade' outro='slide'>
+            <span id='todo-count'>
+              <strong>{{ activeTodos() }}</strong> {{ activeTodos() === 1 ? 'item' : 'items' }} left
+            </span>
+
+            <!-- switch filters -->
+            <ul id='filters'>
+              <li class='{{ currentFilter === "all" ? "selected" : "" }}' on-tap='set_filter:all'>All</li>
+              <li class='{{ currentFilter === "active" ? "selected" : "" }}' on-tap='set_filter:active'>Active</li>
+              <li class='{{ currentFilter === "completed" ? "selected" : "" }}' on-tap='set_filter:completed'>Completed</li>
+            </ul>
+
+            <!-- hidden if no completed items are left -->
+            {{# completedTodos() }}
+              <button id='clear-completed' on-tap='clear_completed'>
+                Clear completed ({{ completedTodos() }})
+              </button>
+            {{/ completedTodos() }}
+          </div>
+        {{/items.length}}
+
+      </div>
+
+
+      <!-- {{>item}} -->
+      {{# filter( this ) }}
+      <li intro='slide:fast' outro='slide:fast' class='{{ .completed ? "completed" : "" }} {{ .editing ? "editing" : "" }}'>
+        <div class='view'>
+          <input class='toggle' type='checkbox' checked='{{.completed}}'>
+          <label on-dblclick='edit'>{{description}}</label>
+          <button on-tap='remove:{{i}}' class='destroy'></button>
+        </div>
+
+        {{#.editing}}
+          <div class='edit-container'>
+            <input intro='select' class='edit' value='{{description}}' on-blur-enter='submit'>
+          </div>
+        {{/.editing}}
+      </li>
+      {{/ end of todo item }}
+      <!-- {{/item}} -->
+      </script>
+      <script src='assets/vendor/ractive/ractive-legacy.js'></script>
+      <script src="assets/vendor/ractive/ractive-events-tap.js"></script>
+      <script src="assets/vendor/ractive/ractive-events-keys.js"></script>
+      <script src="assets/vendor/ractive/ractive-transitions-slide.js"></script>
+      <script id="example-javascript">
+      var items, sampleItems, todoList, filters;
+
+      // our model is a normal array - Ractive will intercept calls to mutator methods
+      // like push and splice, so we don't need to inherit from a custom class or anything
+      sampleItems = [
+        { description: 'Add a todo' },
+        { description: 'Add some more todos' },
+        { description: 'Build something with Ractive.js' }
+      ];
+
+      // Load data from localStorage. FF will throw a SecurityError if you try
+      // to access localStorage with cookies disabled, so we try-catch
+      try {
+        if ( window.localStorage ) {
+          items = JSON.parse( window.localStorage.getItem( 'ractive-todos' ) );
+        }
+
+        if ( !items || !items.length ) {
+          items = sampleItems;
+        }
+      } catch ( err ) {
+        // overwrite localStorage so we don't need to try-catch later
+        window.localStorage = {
+          setItem: function () {} // noop
+        };
+
+        items = sampleItems;
+      }
+
+      // set up some filters
+      filters = {
+        completed: function ( item ) { return item.completed; },
+        active: function ( item ) { return !item.completed; },
+        all: function () { return true; }
+      };
+
+      // create our app view
+      todoList = new Ractive({
+        el: '#example',
+        template: '#template',
+        noIntro: true, // disable transitions during initial render
+
+        data: {
+          items: items,
+          filter: function ( item ) {
+            var filter = filters[ this.get( 'currentFilter' ) ];
+            return filter( item );
+          },
+          currentFilter: 'all',
+
+          // These computed values are aware of their dependency on
+          // `items` because of `this.get( 'items' )` - and will
+          // automatically recompute and update the view when
+          // `items` changes.
+          completedTodos: function () {
+            return this.get( 'items' ).filter( filters.completed ).length;
+          },
+
+          activeTodos: function () {
+            return this.get( 'items' ).filter( filters.active ).length;
+          }
+        },
+
+        // We can define 'transitions', which are applied to elements on intro
+        // or outro. This is normally used for animation, but we can use it for
+        // other purposes, such as autoselecting an input's contents
+        transitions: {
+          select: function ( t ) {
+            setTimeout( function () {
+              t.node.select();
+              t.complete();
+            }, 0 );
+          }
+        }
+      });
+
+      // Various user mouse and keyboard actions, defined in the template, will
+      // fire 'proxy events' that trigger behaviours and state changes
+      todoList.on({
+        remove: function ( event, index ) {
+          items.splice( index, 1 );
+        },
+        new_todo: function ( event ) {
+          items.push({
+            description: event.node.value,
+            completed: false
+          });
+
+          event.node.value = '';
+        },
+        edit: function ( event ) {
+          this.set( event.keypath + '.editing', true );
+        },
+        submit: function ( event ) {
+          this.set( event.keypath + '.editing', false );
+        },
+        clear_completed: function () {
+          var i = items.length;
+
+          while ( i-- ) {
+            if ( items[i].completed ) {
+              items.splice( i, 1 );
+            }
+          }
+        },
+        toggle_all: function ( event ) {
+          var i = items.length, completed = event.node.checked;
+
+          while ( i-- ) {
+            this.set( 'items[' + i + '].completed', completed );
+          }
+        },
+        set_filter: function ( event, filter ) {
+          this.set( 'currentFilter', filter );
+        }
+      });
+
+      // When the model changes, persist to localStorage if possible
+      todoList.observe( 'items', function ( items ) {
+        // persist to localStorage
+        if ( window.localStorage ) {
+          localStorage.setItem( 'ractive-todos', JSON.stringify( items ) );
+        }
+      });
+      </script>
+  </body>
+</html>

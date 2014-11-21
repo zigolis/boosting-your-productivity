@@ -5,7 +5,7 @@
         <title>RactiveJS</title>
         <link rel="stylesheet" href="assets/vendor/bootstrap/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="assets/css/component.css">
-        <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=PT+Sans:400,700|Open+Sans:400,300,700'>
+        <!-- <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=PT+Sans:400,700|Open+Sans:400,300,700'> -->
     </head>
     <body>
       <header class="header">
@@ -18,7 +18,7 @@
 
       <div class="jumbotron">
         <div class="container">
-          <h1>Two way binding</h1>
+          <h1>Transitions</h1>
         </div>
       </div>
 
@@ -38,19 +38,35 @@
       </footer>
 
       <script id='template' type='text/ractive'>
-        <label>
-          Enter your name:
-          <input value='{{name}}'>
-        </label>
+        {{#if visible === 1 }}
+          <button intro='fade' on-tap='show:2'>Click me!</button>
+        {{/if}}
 
-        <p>Hello {{name}}, I am Ractive</p>
+        {{#if visible === 2 }}
+          <button intro='slide' on-tap='show:3'>And me!</button>
+        {{/if}}
+
+        {{#if visible === 3 }}
+          <button intro='fly' on-tap='show:1'>Now click me!</button>
+        {{/if}}
       </script>
 
-      <script src='assets/vendor/ractive/ractive.min.js'></script>
+      <script src='assets/vendor/ractive/ractive-legacy.js'></script>
+      <script src="assets/vendor/ractive/ractive-events-tap.js"></script>
+      <script src="assets/vendor/ractive/ractive-transitions-slide.js"></script>
+      <script src="assets/vendor/ractive/bundle.js"></script>
+
       <script>
         var ractive = new Ractive({
           el: '#output',
-          template: '#template'
+          template: '#template',
+          data: { visible: 1 }
+        });
+
+        ractive.on({
+          show: function ( event, which ) {
+            this.set( 'visible', which );
+          }
         });
       </script>
   </body>
